@@ -1,0 +1,49 @@
+Tip 3: Use Caching to Improve Response Time
+
+Caching is an effective way to reduce response time and decrease the load on your server. You can cache frequently accessed data in memory or use a caching service like Redis.
+
+Here’s an example of in-memory caching:
+
+const http = require('http');
+const data = require('./data.json');
+const cache = {};
+
+http.createServer((req, res) => {
+  const key = req.url;
+  if (cache[key]) {
+    res.end(cache[key]);
+  } else {
+    const result = processData(data); // Simulate processing data
+    cache[key] = result;
+    res.end(result);
+  }
+}).listen(8000);
+
+If you need a more robust caching solution, consider using Redis:
+
+const http = require('http');
+const redis = require('redis');
+const client = redis.createClient();
+
+client.on('error', (err) => {
+  console.error('Error:', err);
+});
+
+http.createServer((req, res) => {
+  const key = req.url;
+  client.get(key, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.end();
+      return;
+    }
+
+    if (result) {
+      res.end(result);
+    } else {
+      const newData = processData(); // Simulate processing data
+      client.set(key, newData);
+      res.end(newData);
+    }
+  });
+}).listen(8000);
